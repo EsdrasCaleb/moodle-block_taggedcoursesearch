@@ -38,6 +38,18 @@ class block_taggedcoursesearch extends block_base {
         $this->title = get_string('pluginname', 'block_taggedcoursesearch');
     }
 
+    public function instance_allow_multiple() {
+        return true;
+    }
+
+    public function applicable_formats() {
+        return array('all' => true);
+    }
+
+    public function instance_allow_config() {
+        return true;
+    }
+
     /**
      * Returns the block contents.
      *
@@ -61,5 +73,32 @@ class block_taggedcoursesearch extends block_base {
         $renderer = $this->page->get_renderer('block_taggedcoursesearch');
         $this->content->text = $renderer->render($renderable);
         return $this->content;
+    }
+
+    public function specialization() {
+
+        // Load userdefined title and make sure it's never empty.
+        if (empty($this->config->title)) {
+            $this->title = get_string('pluginname', 'block_taggedcoursesearch');
+        } else {
+            $this->title = format_string($this->config->title, true, ['context' => $this->context]);
+        }
+    }
+
+
+    public function can_block_be_added(moodle_page $page): bool {
+        global $CFG;
+
+        return $CFG->usetags;
+    }
+
+    public function get_config_for_external() {
+        // Return all settings for all users since it is safe (no private keys, etc..).
+        $configs = !empty($this->config) ? $this->config : new stdClass();
+
+        return (object) [
+            'instance' => $configs,
+            'plugin' => new stdClass(),
+        ];
     }
 }
